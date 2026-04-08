@@ -1,42 +1,20 @@
+// 🔥 Firebase configuration (PASTE YOUR REAL CONFIG HERE)
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "family-calendar-7299c.firebaseapp.com",
+  projectId: "family-calendar-7299c",
+  storageBucket: "family-calendar-7299c.appspot.com",
+  messagingSenderId: "1063556817040",
+  appId: "YOUR_APP_ID"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 const eventList = document.getElementById("eventList");
 
-// Sample data (auto-loads first time)
-const sampleEvents = [
-  {
-    title: "Emma’s Soccer Practice",
-    date: "2026-04-10",
-    person: "Emma",
-    notes: "Bring soccer gear"
-  },
-  {
-    title: "Dad’s Birthday 🎂",
-    date: "2026-04-15",
-    person: "Dad",
-    notes: "Buy cake"
-  },
-  {
-    title: "Family Trip ✈️",
-    date: "2026-04-20",
-    person: "Everyone",
-    notes: "Flight at 9am"
-  }
-];
-
-function getEvents() {
-  return JSON.parse(localStorage.getItem("familyEvents")) || [];
-}
-
-function saveEvents(events) {
-  localStorage.setItem("familyEvents", JSON.stringify(events));
-}
-
-function loadSampleData() {
-  const events = getEvents();
-  if (events.length === 0) {
-    saveEvents(sampleEvents);
-  }
-}
-
+// ➕ Add event
 function addEvent() {
   const title = document.getElementById("title").value;
   const date = document.getElementById("date").value;
@@ -48,21 +26,24 @@ function addEvent() {
     return;
   }
 
-  const events = getEvents();
-  events.push({ title, date, person, notes });
-  saveEvents(events);
+  db.collection("events").add({
+    title,
+    date,
+    person,
+    notes,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
 
   document.querySelectorAll("input, textarea").forEach(el => el.value = "");
-  renderEvents();
 }
 
-function renderEvents() {
-  const events = getEvents();
-  eventList.innerHTML = "";
-
-  events
-    .sort((a, b) => new Date(a.date) - new Date(b.date))
-    .forEach(event => {
+// 🔄 Real-time sync
+db.collection("events")
+  .orderBy("date")
+  .onSnapshot(snapshot => {
+    eventList.innerHTML = "";
+    snapshot.forEach(doc => {
+      const event = doc.data();
       const li = document.createElement("li");
       li.innerHTML = `
         <strong>${event.title}</strong><br>
@@ -71,7 +52,4 @@ function renderEvents() {
       `;
       eventList.appendChild(li);
     });
-}
-
-loadSampleData();
-renderEvents();
+  });
