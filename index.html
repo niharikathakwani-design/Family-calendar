@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Family Calendar</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <h1>👨‍👩‍👧‍👦 Family Calendar</h1>
+
+  <section class="event-form">
+    <h2>Add Event</h2>
+    <input id="title" placeholder="Event title" />
+    <input id="date" type="date" />
+    <input id="person" placeholder="Who is it for?" />
+    <textarea id="notes" placeholder="Notes (optional)"></textarea>
+    <button onclick="addEvent()">Add Event</button>
+  </section>
+
+  <section class="events">
+    <h2>Upcoming Events</h2>
+    <ul id="eventList"></ul>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>
