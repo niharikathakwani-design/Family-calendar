@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <title>Family Calendar</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
 
-  <link rel="stylesheet" href="style.css"�‍👦 Family Calendar</h1>
+  <h1>👨‍👩‍👧‍👦 Family Calendar</h1>
 
   <section class="event-form">
     <h2>Add Event</h2>
@@ -12,7 +15,7 @@
     <input id="date" type="date" />
     <input id="person" placeholder="Who is it for?" />
     <textarea id="notes" placeholder="Notes (optional)"></textarea>
-    <button onclick="addEvent()">Add Event</button>
+    <button id="addBtn">Add Event</button>
   </section>
 
   <section class="events">
@@ -20,10 +23,13 @@
     <ul id="eventList"></ul>
   </section>
 
-  <!-- ✅ Firebase SDKs (THESE MUST BE SCRIPT TAGS) -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.jsc="https://www.gstatic.com/firebasejs/9.23.0/firebasempat.js
+  <!-- ✅ Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-  <!-- ✅ Your app JS -->
-  <script src="script.jsbody>
+  <!-- ✅ Your app -->
+  <script src="script.js"></script>
+
+</body>
 </html>
 ``
