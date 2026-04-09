@@ -12,13 +12,18 @@
 
   <h1>👨‍👩‍👧‍👦 Family Calendar</h1>
 
-  <section class="data-actions">
+ <section class="data-actions">
   <h2>Share / Backup</h2>
 
   <button onclick="exportEvents()">Export Events</button>
 
   <input type="file" id="importFile" accept=".json" />
-  <button onclick="importEvents()">Import Events</button>
+  <button onclick="importEvents()">Import JSON</button>
+
+  <hr />
+
+  <input type="file" id="icsFile" accept=".ics" />
+  <button onclick="importICS()">Import Outlook (.ics)</button>
 </section>
 
   <section class="events">
