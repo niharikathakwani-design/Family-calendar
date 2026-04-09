@@ -1,21 +1,22 @@
-// 🔥 Firebase configuration (PASTE YOUR REAL CONFIG HERE)
+// Firebase config
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
+  apiKey: "PASTE_YOURS",
   authDomain: "family-calendar-7299c.firebaseapp.com",
   projectId: "family-calendar-7299c",
   storageBucket: "family-calendar-7299c.appspot.com",
   messagingSenderId: "1063556817040",
-  appId: "YOUR_APP_ID"
+  appId: "PASTE_YOURS"
 };
 
-// Initialize Firebase
+// Init Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 const eventList = document.getElementById("eventList");
+const addBtn = document.getElementById("addBtn");
 
-// ➕ Add event
-function addEvent() {
+// Add event
+addBtn.addEventListener("click", () => {
   const title = document.getElementById("title").value;
   const date = document.getElementById("date").value;
   const person = document.getElementById("person").value;
@@ -35,21 +36,17 @@ function addEvent() {
   });
 
   document.querySelectorAll("input, textarea").forEach(el => el.value = "");
-}
+});
 
-// 🔄 Real-time sync
+// Listen for events
 db.collection("events")
   .orderBy("date")
   .onSnapshot(snapshot => {
     eventList.innerHTML = "";
     snapshot.forEach(doc => {
-      const event = doc.data();
+      const e = doc.data();
       const li = document.createElement("li");
-      li.innerHTML = `
-        <strong>${event.title}</strong><br>
-        📅 ${event.date} — ${event.person || ""}<br>
-        <small>${event.notes || ""}</small>
-      `;
+      li.innerHTML = `<strong>${e.title}</strong><br>${e.date} — ${e.person || ""}`;
       eventList.appendChild(li);
     });
   });
