@@ -148,7 +148,6 @@ function importICS() {
   reader.readAsArrayBuffer(file);
 }
 function parseICS(text) {
-  // ✅ Unfold folded lines (RFC 5545)
   const unfolded = text.replace(/\r?\n[ \t]/g, "");
   const lines = unfolded.split(/\r?\n/);
 
@@ -160,15 +159,15 @@ function parseICS(text) {
       current = {};
     }
 
-    if (line.startsWith("SUMMARY:") && current) {
-      current.title = line.substring(8).trim();
+    if (current && line.startsWith("SUMMARY")) {
+      current.title = line.split(":").slice(1).join(":").trim();
     }
 
-    if (line.startsWith("DESCRIPTION:") && current) {
-      current.notes = line.substring(12).trim();
+    if (current && line.startsWith("DESCRIPTION")) {
+      current.notes = line.split(":").slice(1).join(":").trim();
     }
 
-    if (line.startsWith("DTSTART") && current) {
+    if (current && line.startsWith("DTSTART")) {
       current.date = extractICSDate(line);
     }
 
@@ -189,7 +188,11 @@ function parseICS(text) {
 }
 
 function extractICSDate(line) {
-  // Matches YYYYMMDD or YYYYMMDDTHHMMSS
+  // Handles:
+  // DTSTART;VALUE=DATE:YYYYMMDD
+  // DTSTART;TZID=America/Toronto:YYYYMMDDTHHMMSS
+  // DTSTART:YYYYMMDD
+
   const match = line.match(/:(\d{8})/);
   if (!match) return "";
 
@@ -199,4 +202,3 @@ function extractICSDate(line) {
 
   return `${y}-${m}-${d}`;
 }
-``
