@@ -4,34 +4,45 @@
   <meta charset="UTF-8">
   <title>Family Calendar</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- ✅ CSS MUST be linked here -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <h1>👨‍👩‍👧‍👦 Family Calendar</h1>
 
- <section class="data-actions">
-  <h2>Share / Backup</h2>
+  <!-- ✅ ADD EVENT SECTION (NEW) -->
+  <section class="event-form">
+    <h2>Add Event</h2>
 
-  <button onclick="exportEvents()">Export Events</button>
+    <input id="title" placeholder="Event title" />
+    <input id="date" type="date" />
+    <input id="person" placeholder="Who is it for?" />
+    <textarea id="notes" placeholder="Notes (optional)"></textarea>
 
-  <input type="file" id="importFile" accept=".json" />
-  <button onclick="importEvents()">Import JSON</button>
+    <button onclick="addEvent()">Add Event</button>
+  </section>
 
-  <hr />
+  <!-- ✅ SHARE / BACKUP -->
+  <section class="data-actions">
+    <h2>Share / Backup</h2>
 
-  <input type="file" id="icsFile" accept=".ics" />
-  <button onclick="importICS()">Import Outlook (.ics)</button>
-</section>
+    <button onclick="exportEvents()">Export Events</button>
 
+    <input type="file" id="importFile" accept=".json" />
+    <button onclick="importEvents()">Import JSON</button>
+
+    <hr />
+
+    <input type="file" id="icsFile" accept=".ics" />
+    <button onclick="importICS()">Import Outlook (.ics)</button>
+  </section>
+
+  <!-- ✅ UPCOMING EVENTS -->
   <section class="events">
     <h2>Upcoming Events</h2>
     <ul id="eventList"></ul>
   </section>
 
-  <!-- ✅ JS MUST be loaded here -->
   <script src="script.js?v=20260409"></script>
 
 </body>
