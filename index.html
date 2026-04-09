@@ -15,7 +15,7 @@
     <input id="date" type="date" />
     <input id="person" placeholder="Who is it for?" />
     <textarea id="notes" placeholder="Notes (optional)"></textarea>
-    <button id="addBtn">Add Event</button>
+    <button onclick="addEvent()">Add Event</button>
   </section>
 
   <section class="events">
@@ -23,13 +23,8 @@
     <ul id="eventList"></ul>
   </section>
 
-  <!-- ✅ Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
-  <!-- ✅ Your app -->
+  <!-- ✅ ONLY this script -->
   <script src="script.js"></script>
 
 </body>
 </html>
-``
