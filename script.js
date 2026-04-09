@@ -4,12 +4,12 @@
 let editingIndex = null;
 
 /*************************
- * DOM ELEMENTS
+ * DOM
  *************************/
 const eventList = document.getElementById("eventList");
 
 /*************************
- * STORAGE HELPERS
+ * STORAGE
  *************************/
 function getEvents() {
   return JSON.parse(localStorage.getItem("familyEvents")) || [];
@@ -72,7 +72,7 @@ function deleteEvent(index) {
 }
 
 /*************************
- * RENDER EVENTS
+ * RENDER
  *************************/
 function renderEvents() {
   const events = getEvents();
@@ -82,16 +82,13 @@ function renderEvents() {
     .sort((a, b) => new Date(a.date) - new Date(b.date))
     .forEach((event, index) => {
       const li = document.createElement("li");
-
       li.innerHTML = `
         <strong>${event.title}</strong><br>
         📅 ${event.date} — ${event.person || ""}<br>
         <small>${event.notes || ""}</small><br><br>
-
         <button onclick="editEvent(${index})">✏️ Edit</button>
         <button onclick="deleteEvent(${index})">🗑 Delete</button>
       `;
-
       eventList.appendChild(li);
     });
 }
@@ -105,11 +102,7 @@ function clearForm() {
  *************************/
 function exportEvents() {
   const data = localStorage.getItem("familyEvents");
-
-  if (!data) {
-    alert("No events to export");
-    return;
-  }
+  if (!data) return alert("No events to export");
 
   const blob = new Blob([data], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -128,6 +121,83 @@ function exportEvents() {
 function importEvents() {
   const fileInput = document.getElementById("importFile");
   const file = fileInput.files[0];
+  if (!file) return alert("Select a file");
 
-  if (!file) {
-    alert("Please select a file");
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (!Array.isArray(imported)) throw new Error();
+      saveEvents(imported);
+      renderEvents();
+      alert("Events imported ✅");
+    } catch {
+      alert("Invalid JSON file");
+    }
+  };
+  reader.readAsText(file);
+}
+
+/*************************
+ * IMPORT OUTLOOK (.ICS)
+ *************************/
+function importICS() {
+  const fileInput = document.getElementById("icsFile");
+  const file = fileInput.files[0];
+  if (!file) return alert("Select an .ics file");
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    let text;
+    try {
+      text = new TextDecoder("utf-16le").decode(reader.result);
+    } catch {
+      text = new TextDecoder("utf-8").decode(reader.result);
+    }
+
+    const imported = parseICS(text);
+    if (!imported.length) return alert("No events found");
+
+    saveEvents(getEvents().concat(imported));
+    renderEvents();
+    alert(`Imported ${imported.length} Outlook events ✅`);
+  };
+
+  reader.readAsArrayBuffer(file);
+}
+
+/*************************
+ * ICS PARSER
+ *************************/
+function parseICS(text) {
+  const unfolded = text.replace(/\r?\n[ \t]/g, "");
+  const lines = unfolded.split(/\r?\n/);
+  const events = [];
+  let current = null;
+
+  for (const line of lines) {
+    if (line === "BEGIN:VEVENT") current = {};
+    if (current && line.startsWith("SUMMARY"))
+      current.title = line.split(":").slice(1).join(":").trim();
+    if (current && line.startsWith("DESCRIPTION"))
+      current.notes = line.split(":").slice(1).join(":").trim();
+    if (current && line.startsWith("DTSTART"))
+      current.date = extractICSDate(line);
+    if (line === "END:VEVENT" && current && current.title && current.date) {
+      events.push({ ...current, person: "Outlook" });
+      current = null;
+    }
+  }
+  return events;
+}
+
+function extractICSDate(line) {
+  const m = line.match(/:(\d{8})/);
+  if (!m) return "";
+  return `${m[1].slice(0,4)}-${m[1].slice(4,6)}-${m[1].slice(6,8)}`;
+}
+
+/*************************
+ * INIT
+ *************************/
+renderEvents();
