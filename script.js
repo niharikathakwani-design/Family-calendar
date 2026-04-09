@@ -1,22 +1,14 @@
-// Firebase config
-const firebaseConfig = {
-  apiKey: "PASTE_YOURS",
-  authDomain: "family-calendar-7299c.firebaseapp.com",
-  projectId: "family-calendar-7299c",
-  storageBucket: "family-calendar-7299c.appspot.com",
-  messagingSenderId: "1063556817040",
-  appId: "PASTE_YOURS"
-};
-
-// Init Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
 const eventList = document.getElementById("eventList");
-const addBtn = document.getElementById("addBtn");
 
-// Add event
-addBtn.addEventListener("click", () => {
+function getEvents() {
+  return JSON.parse(localStorage.getItem("familyEvents")) || [];
+}
+
+function saveEvents(events) {
+  localStorage.setItem("familyEvents", JSON.stringify(events));
+}
+
+function addEvent() {
   const title = document.getElementById("title").value;
   const date = document.getElementById("date").value;
   const person = document.getElementById("person").value;
@@ -27,26 +19,29 @@ addBtn.addEventListener("click", () => {
     return;
   }
 
-  db.collection("events").add({
-    title,
-    date,
-    person,
-    notes,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
+  const events = getEvents();
+  events.push({ title, date, person, notes });
+  saveEvents(events);
 
   document.querySelectorAll("input, textarea").forEach(el => el.value = "");
-});
+  renderEvents();
+}
 
-// Listen for events
-db.collection("events")
-  .orderBy("date")
-  .onSnapshot(snapshot => {
-    eventList.innerHTML = "";
-    snapshot.forEach(doc => {
-      const e = doc.data();
+function renderEvents() {
+  const events = getEvents();
+  eventList.innerHTML = "";
+
+  events
+    .sort((a, b) => new Date(a.date) - new Date(b.date))
+    .forEach(event => {
       const li = document.createElement("li");
-      li.innerHTML = `<strong>${e.title}</strong><br>${e.date} — ${e.person || ""}`;
+      li.innerHTML = `
+        <strong>${event.title}</strong><br>
+        📅 ${event.date} — ${event.person || ""}<br>
+        <small>${event.notes || ""}</small>
+      `;
       eventList.appendChild(li);
     });
-  });
+}
+
+renderEvents();
