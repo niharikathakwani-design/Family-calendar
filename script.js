@@ -1,6 +1,12 @@
+/***********************
+ * DOM ELEMENTS
+ ***********************/
 const eventList = document.getElementById("eventList");
 const addBtn = document.getElementById("addBtn");
 
+/***********************
+ * STORAGE HELPERS
+ ***********************/
 function getEvents() {
   return JSON.parse(localStorage.getItem("familyEvents")) || [];
 }
@@ -9,6 +15,9 @@ function saveEvents(events) {
   localStorage.setItem("familyEvents", JSON.stringify(events));
 }
 
+/***********************
+ * RENDER EVENTS
+ ***********************/
 function renderEvents() {
   const events = getEvents();
   eventList.innerHTML = "";
@@ -26,24 +35,33 @@ function renderEvents() {
     });
 }
 
-addBtn.addEventListener("click", () => {
-  const title = document.getElementById("title").value;
-  const date = document.getElementById("date").value;
-  const person = document.getElementById("person").value;
-  const notes = document.getElementById("notes").value;
+/***********************
+ * ADD EVENT
+ ***********************/
+if (addBtn) {
+  addBtn.addEventListener("click", () => {
+    const title = document.getElementById("title").value;
+    const date = document.getElementById("date").value;
+    const person = document.getElementById("person").value;
+    const notes = document.getElementById("notes").value;
 
-  if (!title || !date) {
-    alert("Title and date are required");
-    return;
-  }
+    if (!title || !date) {
+      alert("Title and date are required");
+      return;
+    }
 
-  const events = getEvents();
-  events.push({ title, date, person, notes });
-  saveEvents(events);
+    const events = getEvents();
+    events.push({ title, date, person, notes });
+    saveEvents(events);
 
-  document.querySelectorAll("input, textarea").forEach(el => el.value = "");
-  renderEvents();
-  // 📤 Export events to JSON file
+    document.querySelectorAll("input, textarea").forEach(el => el.value = "");
+    renderEvents();
+  });
+}
+
+/***********************
+ * EXPORT JSON
+ ***********************/
 function exportEvents() {
   const events = localStorage.getItem("familyEvents");
 
@@ -63,7 +81,9 @@ function exportEvents() {
   URL.revokeObjectURL(url);
 }
 
-// 📥 Import events from JSON file
+/***********************
+ * IMPORT JSON
+ ***********************/
 function importEvents() {
   const fileInput = document.getElementById("importFile");
   const file = fileInput.files[0];
@@ -74,30 +94,29 @@ function importEvents() {
   }
 
   const reader = new FileReader();
-  reader.onload = function (e) {
+  reader.onload = e => {
     try {
       const importedEvents = JSON.parse(e.target.result);
 
       if (!Array.isArray(importedEvents)) {
-        throw new Error("Invalid file format");
+        throw new Error("Invalid format");
       }
 
-      localStorage.setItem("familyEvents", JSON.stringify(importedEvents));
+      saveEvents(importedEvents);
       renderEvents();
-
       alert("Events imported successfully ✅");
       fileInput.value = "";
-    } catch (err) {
+    } catch {
       alert("Invalid file. Please upload a valid calendar export.");
     }
   };
 
   reader.readAsText(file);
 }
-});
 
-// ✅ Initial load
-renderEvents();
+/***********************
+ * IMPORT OUTLOOK (.ICS)
+ ***********************/
 function importICS() {
   const fileInput = document.getElementById("icsFile");
   const file = fileInput.files[0];
@@ -112,31 +131,27 @@ function importICS() {
   reader.onload = function () {
     try {
       const buffer = reader.result;
-
       let text;
+
       try {
-        // ✅ Try UTF‑16 first (Outlook default)
+        // Outlook default
         text = new TextDecoder("utf-16le").decode(buffer);
       } catch {
-        // ✅ Fallback to UTF‑8
         text = new TextDecoder("utf-8").decode(buffer);
       }
 
-      const events = parseICS(text);
+      const imported = parseICS(text);
 
-      if (!events.length) {
+      if (!imported.length) {
         alert("No events found in the Outlook calendar file.");
         return;
       }
 
-      const existing = JSON.parse(localStorage.getItem("familyEvents")) || [];
-      localStorage.setItem(
-        "familyEvents",
-        JSON.stringify(existing.concat(events))
-      );
-
+      const existing = getEvents();
+      saveEvents(existing.concat(imported));
       renderEvents();
-      alert(`Imported ${events.length} Outlook events ✅`);
+
+      alert(`Imported ${imported.length} Outlook events ✅`);
       fileInput.value = "";
     } catch (err) {
       console.error(err);
@@ -144,9 +159,12 @@ function importICS() {
     }
   };
 
-  // ✅ IMPORTANT: read as binary, not text
   reader.readAsArrayBuffer(file);
 }
+
+/***********************
+ * ICS PARSER
+ ***********************/
 function parseICS(text) {
   const unfolded = text.replace(/\r?\n[ \t]/g, "");
   const lines = unfolded.split(/\r?\n/);
@@ -188,11 +206,6 @@ function parseICS(text) {
 }
 
 function extractICSDate(line) {
-  // Handles:
-  // DTSTART;VALUE=DATE:YYYYMMDD
-  // DTSTART;TZID=America/Toronto:YYYYMMDDTHHMMSS
-  // DTSTART:YYYYMMDD
-
   const match = line.match(/:(\d{8})/);
   if (!match) return "";
 
@@ -202,3 +215,8 @@ function extractICSDate(line) {
 
   return `${y}-${m}-${d}`;
 }
+
+/***********************
+ * INITIAL LOAD
+ ***********************/
+renderEvents();
