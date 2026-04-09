@@ -108,9 +108,20 @@ function importICS() {
   }
 
   const reader = new FileReader();
-  reader.onload = function (e) {
+
+  reader.onload = function () {
     try {
-      const text = e.target.result;
+      const buffer = reader.result;
+
+      let text;
+      try {
+        // ✅ Try UTF‑16 first (Outlook default)
+        text = new TextDecoder("utf-16le").decode(buffer);
+      } catch {
+        // ✅ Fallback to UTF‑8
+        text = new TextDecoder("utf-8").decode(buffer);
+      }
+
       const events = parseICS(text);
 
       if (!events.length) {
@@ -133,9 +144,9 @@ function importICS() {
     }
   };
 
-  reader.readAsText(file);
+  // ✅ IMPORTANT: read as binary, not text
+  reader.readAsArrayBuffer(file);
 }
-
 function parseICS(text) {
   // ✅ Unfold folded lines (RFC 5545)
   const unfolded = text.replace(/\r?\n[ \t]/g, "");
