@@ -38,6 +38,9 @@ button:hover {
 li {
   border-bottom: 1px solid #ddd;
   padding: 8px 0;
+  .data-actions button {
+  margin-bottom: 10px;
+}
 }
 li {
   border-bottom: 1px solid #ddd;
