@@ -113,22 +113,23 @@ function importICS() {
       const text = e.target.result;
       const events = parseICS(text);
 
-      if (events.length === 0) {
-        alert("No events found in the file");
+      if (!events.length) {
+        alert("No events found in the Outlook calendar file.");
         return;
       }
 
       const existing = JSON.parse(localStorage.getItem("familyEvents")) || [];
-      const merged = existing.concat(events);
+      localStorage.setItem(
+        "familyEvents",
+        JSON.stringify(existing.concat(events))
+      );
 
-      localStorage.setItem("familyEvents", JSON.stringify(merged));
       renderEvents();
-
-      alert(`Imported ${events.length} events from Outlook ✅`);
+      alert(`Imported ${events.length} Outlook events ✅`);
       fileInput.value = "";
     } catch (err) {
-      alert("Could not read Outlook calendar file");
       console.error(err);
+      alert("Could not read Outlook calendar file");
     }
   };
 
@@ -136,28 +137,31 @@ function importICS() {
 }
 
 function parseICS(text) {
-  const lines = text.split(/\r?\n/);
+  // ✅ Unfold folded lines (RFC 5545)
+  const unfolded = text.replace(/\r?\n[ \t]/g, "");
+  const lines = unfolded.split(/\r?\n/);
+
   const events = [];
   let current = null;
 
-  for (let line of lines) {
-    if (line.startsWith("BEGIN:VEVENT")) {
+  for (const line of lines) {
+    if (line === "BEGIN:VEVENT") {
       current = {};
     }
 
-    if (line.startsWith("SUMMARY:")) {
-      current.title = line.replace("SUMMARY:", "").trim();
+    if (line.startsWith("SUMMARY:") && current) {
+      current.title = line.substring(8).trim();
     }
 
-    if (line.startsWith("DTSTART")) {
-      current.date = parseICSDate(line);
+    if (line.startsWith("DESCRIPTION:") && current) {
+      current.notes = line.substring(12).trim();
     }
 
-    if (line.startsWith("DESCRIPTION:")) {
-      current.notes = line.replace("DESCRIPTION:", "").trim();
+    if (line.startsWith("DTSTART") && current) {
+      current.date = extractICSDate(line);
     }
 
-    if (line.startsWith("END:VEVENT") && current) {
+    if (line === "END:VEVENT" && current) {
       if (current.title && current.date) {
         events.push({
           title: current.title,
@@ -173,7 +177,8 @@ function parseICS(text) {
   return events;
 }
 
-function parseICSDate(line) {
+function extractICSDate(line) {
+  // Matches YYYYMMDD or YYYYMMDDTHHMMSS
   const match = line.match(/:(\d{8})/);
   if (!match) return "";
 
@@ -183,3 +188,4 @@ function parseICSDate(line) {
 
   return `${y}-${m}-${d}`;
 }
+``
