@@ -43,6 +43,57 @@ addBtn.addEventListener("click", () => {
 
   document.querySelectorAll("input, textarea").forEach(el => el.value = "");
   renderEvents();
+  // 📤 Export events to JSON file
+function exportEvents() {
+  const events = localStorage.getItem("familyEvents");
+
+  if (!events) {
+    alert("No events to export");
+    return;
+  }
+
+  const blob = new Blob([events], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "family-calendar-events.json";
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+// 📥 Import events from JSON file
+function importEvents() {
+  const fileInput = document.getElementById("importFile");
+  const file = fileInput.files[0];
+
+  if (!file) {
+    alert("Please select a file first");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      const importedEvents = JSON.parse(e.target.result);
+
+      if (!Array.isArray(importedEvents)) {
+        throw new Error("Invalid file format");
+      }
+
+      localStorage.setItem("familyEvents", JSON.stringify(importedEvents));
+      renderEvents();
+
+      alert("Events imported successfully ✅");
+      fileInput.value = "";
+    } catch (err) {
+      alert("Invalid file. Please upload a valid calendar export.");
+    }
+  };
+
+  reader.readAsText(file);
+}
 });
 
 // ✅ Initial load
