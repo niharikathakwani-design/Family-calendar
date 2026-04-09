@@ -98,3 +98,88 @@ function importEvents() {
 
 // ✅ Initial load
 renderEvents();
+function importICS() {
+  const fileInput = document.getElementById("icsFile");
+  const file = fileInput.files[0];
+
+  if (!file) {
+    alert("Please select an Outlook .ics file");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      const text = e.target.result;
+      const events = parseICS(text);
+
+      if (events.length === 0) {
+        alert("No events found in the file");
+        return;
+      }
+
+      const existing = JSON.parse(localStorage.getItem("familyEvents")) || [];
+      const merged = existing.concat(events);
+
+      localStorage.setItem("familyEvents", JSON.stringify(merged));
+      renderEvents();
+
+      alert(`Imported ${events.length} events from Outlook ✅`);
+      fileInput.value = "";
+    } catch (err) {
+      alert("Could not read Outlook calendar file");
+      console.error(err);
+    }
+  };
+
+  reader.readAsText(file);
+}
+
+function parseICS(text) {
+  const lines = text.split(/\r?\n/);
+  const events = [];
+  let current = null;
+
+  for (let line of lines) {
+    if (line.startsWith("BEGIN:VEVENT")) {
+      current = {};
+    }
+
+    if (line.startsWith("SUMMARY:")) {
+      current.title = line.replace("SUMMARY:", "").trim();
+    }
+
+    if (line.startsWith("DTSTART")) {
+      current.date = parseICSDate(line);
+    }
+
+    if (line.startsWith("DESCRIPTION:")) {
+      current.notes = line.replace("DESCRIPTION:", "").trim();
+    }
+
+    if (line.startsWith("END:VEVENT") && current) {
+      if (current.title && current.date) {
+        events.push({
+          title: current.title,
+          date: current.date,
+          person: "Outlook",
+          notes: current.notes || ""
+        });
+      }
+      current = null;
+    }
+  }
+
+  return events;
+}
+
+function parseICSDate(line) {
+  const match = line.match(/:(\d{8})/);
+  if (!match) return "";
+
+  const y = match[1].slice(0, 4);
+  const m = match[1].slice(4, 6);
+  const d = match[1].slice(6, 8);
+
+  return `${y}-${m}-${d}`;
+}
