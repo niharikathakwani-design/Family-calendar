@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Family Calendar</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
   <h1>👨‍👩‍👧‍👦 Family Calendar</h1>
 
-  <!-- ✅ ADD EVENT SECTION (NEW) -->
+  <!-- ADD EVENT -->
   <section class="event-form">
     <h2>Add Event</h2>
 
@@ -22,7 +22,7 @@
     <button onclick="addEvent()">Add Event</button>
   </section>
 
-  <!-- ✅ SHARE / BACKUP -->
+  <!-- SHARE / BACKUP -->
   <section class="data-actions">
     <h2>Share / Backup</h2>
 
@@ -37,13 +37,12 @@
     <button onclick="importICS()">Import Outlook (.ics)</button>
   </section>
 
-  <!-- ✅ UPCOMING EVENTS -->
+  <!-- UPCOMING EVENTS -->
   <section class="events">
     <h2>Upcoming Events</h2>
     <ul id="eventList"></ul>
   </section>
 
-  <script src="script.js?v=20260409"></script>
-
+  <script src="script.js"></script>
 </body>
 </html>
