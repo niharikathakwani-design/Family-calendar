@@ -1,4 +1,5 @@
 const eventList = document.getElementById("eventList");
+const addBtn = document.getElementById("addBtn");
 
 function getEvents() {
   return JSON.parse(localStorage.getItem("familyEvents")) || [];
@@ -6,25 +7,6 @@ function getEvents() {
 
 function saveEvents(events) {
   localStorage.setItem("familyEvents", JSON.stringify(events));
-}
-
-function addEvent() {
-  const title = document.getElementById("title").value;
-  const date = document.getElementById("date").value;
-  const person = document.getElementById("person").value;
-  const notes = document.getElementById("notes").value;
-
-  if (!title || !date) {
-    alert("Title and date are required");
-    return;
-  }
-
-  const events = getEvents();
-  events.push({ title, date, person, notes });
-  saveEvents(events);
-
-  document.querySelectorAll("input, textarea").forEach(el => el.value = "");
-  renderEvents();
 }
 
 function renderEvents() {
@@ -44,4 +26,24 @@ function renderEvents() {
     });
 }
 
+addBtn.addEventListener("click", () => {
+  const title = document.getElementById("title").value;
+  const date = document.getElementById("date").value;
+  const person = document.getElementById("person").value;
+  const notes = document.getElementById("notes").value;
+
+  if (!title || !date) {
+    alert("Title and date are required");
+    return;
+  }
+
+  const events = getEvents();
+  events.push({ title, date, person, notes });
+  saveEvents(events);
+
+  document.querySelectorAll("input, textarea").forEach(el => el.value = "");
+  renderEvents();
+});
+
+// ✅ Initial load
 renderEvents();
